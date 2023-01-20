@@ -7,7 +7,7 @@ from . import models, schemas
 class ItemRepo:
     
  async def create(db: Session, item: schemas.ItemCreate):
-        db_item = models.Item(name=item.name,price=item.price,description=item.description,store_id=item.store_id)
+        db_item = models.Item(name=item.name,price=item.price,description=item.description,store_id=item.store_id,group_id=item.group_id)
         db.add(db_item)
         db.commit()
         db.refresh(db_item)
@@ -60,4 +60,32 @@ class StoreRepo:
         
     async def update(db: Session,store_data):
         db.merge(store_data)
+        db.commit()
+
+#group
+class GroupRepo:
+    
+    async def create(db: Session, group: schemas.GroupCreate):
+            db_group = models.Group(name=group.name)
+            db.add(db_group)
+            db.commit()
+            db.refresh(db_group)
+            return db_group
+        
+    def fetch_by_id(db: Session,_id:int):
+        return db.query(models.Group).filter(models.Group.id == _id).first()
+    
+    def fetch_by_name(db: Session,name:str):
+        return db.query(models.Group).filter(models.Group.name == name).first()
+    
+    def fetch_all(db: Session, skip: int = 0, limit: int = 100):
+        return db.query(models.Group).offset(skip).limit(limit).all()
+    
+    async def delete(db: Session,_id:int):
+        db_group= db.query(models.Group).filter_by(id=_id).first()
+        db.delete(db_group)
+        db.commit()
+        
+    async def update(db: Session,group_data):
+        db.merge(group_data)
         db.commit()

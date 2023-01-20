@@ -8,11 +8,12 @@ class Item(Base):
     
     id = Column(Integer, primary_key=True,index=True)
     name = Column(String(80), nullable=False, unique=True,index=True)
+    group_id = Column(Integer,ForeignKey('groups.id'),nullable=True)
     price = Column(Float(precision=2), nullable=False)
     description = Column(String(200))
     store_id = Column(Integer,ForeignKey('stores.id'),nullable=False)
-    def __repr__(self):
-        return 'ItemModel(name=%s, price=%s,store_id=%s)' % (self.name, self.price,self.store_id)
+    
+
     
 class Store(Base):
     __tablename__ = "stores"
@@ -20,5 +21,9 @@ class Store(Base):
     name = Column(String(80), nullable=False, unique=True)
     items = relationship("Item",primaryjoin="Store.id == Item.store_id",cascade="all, delete-orphan")
 
-    def __repr__(self):
-        return 'Store(name=%s)' % self.name
+
+class Group(Base):
+    __tablename__ = "groups"
+    id = Column(Integer, primary_key=True,index=True)
+    name = Column(String(100), nullable=False, unique=True)
+    items = relationship("Item",primaryjoin="Group.id == Item.group_id",cascade="all, delete-orphan")

@@ -14,11 +14,15 @@ from starlette.responses import RedirectResponse
 import sql_app.models as models
 import sql_app.schemas as schemas
 from db import get_db, engine
-from sql_app.repositories import ItemRepo, StoreRepo
+from sql_app.repositories import ItemRepo, StoreRepo , GroupRepo
 
-app = FastAPI(title="Sample FastAPI Application",
-              description="Sample FastAPI Application with Swagger and Sqlalchemy",
-              version="1.0.0", )
+app = FastAPI(title="My FastAPI",
+        description= """
+            this is my project
+            We made this project for the web design course
+             """,
+        version="1.0.0", 
+        contact={"name": "zahra", "email":"zahra.hsp76@gmail.com"},)
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -72,7 +76,7 @@ def get_all_items(name: Optional[str] = None, db: Session = Depends(get_db)):
 @app.get('/items/{item_id}', tags=["Item"], response_model=schemas.Item)
 def get_item(item_id: int, db: Session = Depends(get_db)):
     """
-    Get the Item with the given ID provided by User stored in database
+    Get the Item with the given ID provided by Group stored in database
     """
     db_item = ItemRepo.fetch_by_id(db, item_id)
     if db_item is None:
@@ -83,7 +87,7 @@ def get_item(item_id: int, db: Session = Depends(get_db)):
 @app.delete('/items/{item_id}', tags=["Item"])
 async def delete_item(item_id: int, db: Session = Depends(get_db)):
     """
-    Delete the Item with the given ID provided by User stored in database
+    Delete the Item with the given ID provided by Group stored in database
     """
     db_item = ItemRepo.fetch_by_id(db, item_id)
     if db_item is None:
@@ -104,6 +108,7 @@ async def update_item(item_id: int, item_request: schemas.Item, db: Session = De
         db_item.price = update_item_encoded['price']
         db_item.description = update_item_encoded['description']
         db_item.store_id = update_item_encoded['store_id']
+        db_item.group_id = update_item_encoded['group_id']
         return await ItemRepo.update(db=db, item_data=db_item)
     else:
         raise HTTPException(status_code=400, detail="Item not found with the given ID")
@@ -140,7 +145,7 @@ def get_all_stores(name: Optional[str] = None, db: Session = Depends(get_db)):
 @app.get('/stores/{store_id}', tags=["Store"], response_model=schemas.Store)
 def get_store(store_id: int, db: Session = Depends(get_db)):
     """
-    Get the Store with the given ID provided by User stored in database
+    Get the Store with the given ID provided by Group stored in database
     """
     db_store = StoreRepo.fetch_by_id(db, store_id)
     if db_store is None:
@@ -151,13 +156,65 @@ def get_store(store_id: int, db: Session = Depends(get_db)):
 @app.delete('/stores/{store_id}', tags=["Store"])
 async def delete_store(store_id: int, db: Session = Depends(get_db)):
     """
-    Delete the Item with the given ID provided by User stored in database
+    Delete the Item with the given ID provided by Group stored in database
     """
     db_store = StoreRepo.fetch_by_id(db, store_id)
     if db_store is None:
         raise HTTPException(status_code=404, detail="Store not found with the given ID")
     await StoreRepo.delete(db, store_id)
     return "Store deleted successfully!"
+
+#group
+
+@app.post('/groups', tags=["Group"], response_model=schemas.Group, status_code=201)
+async def create_group(group_request: schemas.GroupCreate, db: Session = Depends(get_db)):
+    """
+    Create a Store and save it in the database
+    """
+    db_group = GroupRepo.fetch_by_name(db, name=group_request.name)
+    print(db_group)
+    if db_group:
+        raise HTTPException(status_code=400, detail="group already exists!")
+
+    return await GroupRepo.create(db=db, group=group_request)
+
+
+@app.get('/groups', tags=["Group"], response_model=List[schemas.Group])
+def get_all_groups(name: Optional[str] = None, db: Session = Depends(get_db)):
+    """
+    Get all the Group stored in database
+    """
+    if name:
+        groups = []
+        db_group = GroupRepo.fetch_by_name(db, name)
+        print(db_store)
+        groups.append(db_group)
+        return groups
+    else:
+        return GroupRepo.fetch_all(db)
+
+
+@app.get('/groups/{group_id}', tags=["Group"], response_model=schemas.Group)
+def get_group(group_id: int, db: Session = Depends(get_db)):
+    """
+    Get the group with the given ID provided by Group stored in database
+    """
+    db_group = GroupRepo.fetch_by_id(db, group_id)
+    if db_group is None:
+        raise HTTPException(status_code=404, detail="group not found with the given ID")
+    return db_group
+
+
+@app.delete('/groups/{group_id}', tags=["Group"])
+async def delete_group(group_id: int, db: Session = Depends(get_db)):
+    """
+    Delete the Item with the given ID provided by Group stored in database
+    """
+    db_group = GroupRepo.fetch_by_id(db, group_id)
+    if db_group is None:
+        raise HTTPException(status_code=404, detail="group not found with the given ID")
+    await GroupRepo.delete(db, group_id)
+    return "Group deleted successfully!"
 
 
 @app.get("/universities/", tags=["University"])

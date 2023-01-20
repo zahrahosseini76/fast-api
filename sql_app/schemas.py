@@ -8,6 +8,7 @@ class ItemBase(BaseModel):
     price: float
     description: Optional[str] = None
     store_id: int
+    group_id: int
 
 
 class ItemCreate(ItemBase):
@@ -30,6 +31,21 @@ class StoreCreate(StoreBase):
 
 
 class Store(StoreBase):
+    id: int
+    items: List[Item] = []
+
+    class Config:
+        orm_mode = True
+#group
+class GroupBase(BaseModel):
+    name: str
+
+
+class GroupCreate(GroupBase):
+    pass
+
+
+class Group(GroupBase):
     id: int
     items: List[Item] = []
 
