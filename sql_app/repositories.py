@@ -7,7 +7,7 @@ from . import models, schemas
 class ItemRepo:
     
  async def create(db: Session, item: schemas.ItemCreate):
-        db_item = models.Item(name=item.name,price=item.price,description=item.description,store_id=item.store_id,group_id=item.group_id)
+        db_item = models.Item(name=item.name,price=item.price,description=item.description,store_id=item.store_id,group_id=item.group_id,user_id=item.user_id)
         db.add(db_item)
         db.commit()
         db.refresh(db_item)
@@ -89,3 +89,22 @@ class GroupRepo:
     async def update(db: Session,group_data):
         db.merge(group_data)
         db.commit()
+
+class UserRepo:
+    
+    async def create(db: Session, user: schemas.UserCreate):
+            db_user = models.User(name=user.name, id=user.id, password=user.password ,email=user.email ,phone=user.phone)
+            db.add(db_user)
+            db.commit()
+            db.refresh(db_user)
+            return db_user
+        
+    def fetch_by_email(db: Session,_email:str):
+        return db.query(models.User).filter(models.User.email == email).first()
+    def fetch_by_password(db: Session,_password:int):
+        return db.query(models.User).filter(models.User.password == password).first()
+    def fetch_by_id(db: Session,_id:int):
+        return db.query(models.User).filter(models.User.id == _id).first()
+    def fetch_by_name(db: Session,name:str):
+        return db.query(models.User).filter(models.User.name == name).first()
+    

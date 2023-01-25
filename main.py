@@ -14,7 +14,7 @@ from starlette.responses import RedirectResponse
 import sql_app.models as models
 import sql_app.schemas as schemas
 from db import get_db, engine
-from sql_app.repositories import ItemRepo, StoreRepo , GroupRepo
+from sql_app.repositories import ItemRepo, StoreRepo , GroupRepo ,UserRepo
 
 app = FastAPI(title="My FastAPI",
         description= """
@@ -109,6 +109,7 @@ async def update_item(item_id: int, item_request: schemas.Item, db: Session = De
         db_item.description = update_item_encoded['description']
         db_item.store_id = update_item_encoded['store_id']
         db_item.group_id = update_item_encoded['group_id']
+        db_item.user_id = update_item_encoded['user_id']
         return await ItemRepo.update(db=db, item_data=db_item)
     else:
         raise HTTPException(status_code=400, detail="Item not found with the given ID")
@@ -215,7 +216,21 @@ async def delete_group(group_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="group not found with the given ID")
     await GroupRepo.delete(db, group_id)
     return "Group deleted successfully!"
+#User
+@app.post('/register',  tags=["User"], response_model=schemas.User, status_code=201)
+async def create_user(user_request: schemas.UserCreate, db: Session = Depends(get_db)):
+    db_user = UserRepo.fetch_by_name(db, password=user_request.name)
+    if db_user:
+        raise HTTPException(status_code=400,detail='Account already exist')
 
+    return await UserRepo.create(db=db, user=user_request)
+
+@app.get('/login/{user_id}', tags=["User"],response_model=schemas.User)
+def login(user_id: int, db: Session = Depends(get_db)):
+    db_user = UserRepo.fetch_by_id(db, user_id)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="user not found with the given ID")
+    return db_user
 
 @app.get("/universities/", tags=["University"])
 def get_universities() -> dict:

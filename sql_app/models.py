@@ -7,6 +7,7 @@ class Item(Base):
     __tablename__ = "items"
     
     id = Column(Integer, primary_key=True,index=True)
+    user_id = Column(Integer,ForeignKey('users.id'),nullable=True)
     name = Column(String(80), nullable=False, unique=True,index=True)
     group_id = Column(Integer,ForeignKey('groups.id'),nullable=True)
     price = Column(Float(precision=2), nullable=False)
@@ -27,3 +28,13 @@ class Group(Base):
     id = Column(Integer, primary_key=True,index=True)
     name = Column(String(100), nullable=False, unique=True)
     items = relationship("Item",primaryjoin="Group.id == Item.group_id",cascade="all, delete-orphan")
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True, nullable=False,index=True)
+    name = Column(String,  nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
+    phone = Column(Integer, nullable=True)
+    role = Column(String, server_default='user', nullable=False)
+    items = relationship("Item",primaryjoin="User.id == Item.user_id",cascade="all, delete-orphan")
