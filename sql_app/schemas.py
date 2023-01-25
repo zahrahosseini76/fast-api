@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, constr
+from pydantic import BaseModel ,EmailStr
 
 
 class ItemBase(BaseModel):
@@ -8,8 +8,8 @@ class ItemBase(BaseModel):
     price: float
     description: Optional[str] = None
     store_id: int
-    group_id: int
-    user_id:int
+    user_id: int
+
 
 class ItemCreate(ItemBase):
     pass
@@ -36,42 +36,24 @@ class Store(StoreBase):
 
     class Config:
         orm_mode = True
-#group
-class GroupBase(BaseModel):
+#user
+class UserBase(BaseModel):
     name: str
+    email: str
+    password: int
+    phone: int
 
-
-class GroupCreate(GroupBase):
+class UserCreate(UserBase):
     pass
 
 
-class Group(GroupBase):
+class User(UserBase):
     id: int
     items: List[Item] = []
 
     class Config:
         orm_mode = True
 
-class UserBase(BaseModel):
+class UserRegister(BaseModel):
     name: str
-    email: str
-    phone: int
-    password: int
-    role: str = 'user'
-class UserCreate(UserBase):
-    
-    pass
 
-class User(BaseModel):
-    id: int
-    email: str
-    password: int
-    class Config:
-        orm_mode = True
-
-class University(BaseModel):
-    country: Optional[str] = None
-    web_pages: List[str] = []
-    name: Optional[str] = None
-    alpha_two_code: Optional[str] = None
-    domains: List[str] = []

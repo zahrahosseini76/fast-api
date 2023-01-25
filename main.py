@@ -5,7 +5,6 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-import universities
 import time
 import asyncio
 from starlette.responses import RedirectResponse
@@ -14,7 +13,7 @@ from starlette.responses import RedirectResponse
 import sql_app.models as models
 import sql_app.schemas as schemas
 from db import get_db, engine
-from sql_app.repositories import ItemRepo, StoreRepo , GroupRepo ,UserRepo
+from sql_app.repositories import ItemRepo, StoreRepo , UserRepo
 
 app = FastAPI(title="My FastAPI",
         description= """
@@ -76,7 +75,7 @@ def get_all_items(name: Optional[str] = None, db: Session = Depends(get_db)):
 @app.get('/items/{item_id}', tags=["Item"], response_model=schemas.Item)
 def get_item(item_id: int, db: Session = Depends(get_db)):
     """
-    Get the Item with the given ID provided by Group stored in database
+    Get the Item with the given ID provided by User stored in database
     """
     db_item = ItemRepo.fetch_by_id(db, item_id)
     if db_item is None:
@@ -87,7 +86,7 @@ def get_item(item_id: int, db: Session = Depends(get_db)):
 @app.delete('/items/{item_id}', tags=["Item"])
 async def delete_item(item_id: int, db: Session = Depends(get_db)):
     """
-    Delete the Item with the given ID provided by Group stored in database
+    Delete the Item with the given ID provided by User stored in database
     """
     db_item = ItemRepo.fetch_by_id(db, item_id)
     if db_item is None:
@@ -108,7 +107,6 @@ async def update_item(item_id: int, item_request: schemas.Item, db: Session = De
         db_item.price = update_item_encoded['price']
         db_item.description = update_item_encoded['description']
         db_item.store_id = update_item_encoded['store_id']
-        db_item.group_id = update_item_encoded['group_id']
         db_item.user_id = update_item_encoded['user_id']
         return await ItemRepo.update(db=db, item_data=db_item)
     else:
@@ -146,7 +144,7 @@ def get_all_stores(name: Optional[str] = None, db: Session = Depends(get_db)):
 @app.get('/stores/{store_id}', tags=["Store"], response_model=schemas.Store)
 def get_store(store_id: int, db: Session = Depends(get_db)):
     """
-    Get the Store with the given ID provided by Group stored in database
+    Get the Store with the given ID provided by User stored in database
     """
     db_store = StoreRepo.fetch_by_id(db, store_id)
     if db_store is None:
@@ -157,7 +155,7 @@ def get_store(store_id: int, db: Session = Depends(get_db)):
 @app.delete('/stores/{store_id}', tags=["Store"])
 async def delete_store(store_id: int, db: Session = Depends(get_db)):
     """
-    Delete the Item with the given ID provided by Group stored in database
+    Delete the Item with the given ID provided by User stored in database
     """
     db_store = StoreRepo.fetch_by_id(db, store_id)
     if db_store is None:
@@ -165,96 +163,57 @@ async def delete_store(store_id: int, db: Session = Depends(get_db)):
     await StoreRepo.delete(db, store_id)
     return "Store deleted successfully!"
 
-#group
+#user
 
-@app.post('/groups', tags=["Group"], response_model=schemas.Group, status_code=201)
-async def create_group(group_request: schemas.GroupCreate, db: Session = Depends(get_db)):
+@app.post('/users', tags=["User"], response_model=schemas.User, status_code=201)
+async def create_user(user_request: schemas.UserCreate, db: Session = Depends(get_db)):
     """
     Create a Store and save it in the database
     """
-    db_group = GroupRepo.fetch_by_name(db, name=group_request.name)
-    print(db_group)
-    if db_group:
-        raise HTTPException(status_code=400, detail="group already exists!")
-
-    return await GroupRepo.create(db=db, group=group_request)
-
-
-@app.get('/groups', tags=["Group"], response_model=List[schemas.Group])
-def get_all_groups(name: Optional[str] = None, db: Session = Depends(get_db)):
-    """
-    Get all the Group stored in database
-    """
-    if name:
-        groups = []
-        db_group = GroupRepo.fetch_by_name(db, name)
-        print(db_store)
-        groups.append(db_group)
-        return groups
-    else:
-        return GroupRepo.fetch_all(db)
-
-
-@app.get('/groups/{group_id}', tags=["Group"], response_model=schemas.Group)
-def get_group(group_id: int, db: Session = Depends(get_db)):
-    """
-    Get the group with the given ID provided by Group stored in database
-    """
-    db_group = GroupRepo.fetch_by_id(db, group_id)
-    if db_group is None:
-        raise HTTPException(status_code=404, detail="group not found with the given ID")
-    return db_group
-
-
-@app.delete('/groups/{group_id}', tags=["Group"])
-async def delete_group(group_id: int, db: Session = Depends(get_db)):
-    """
-    Delete the Item with the given ID provided by Group stored in database
-    """
-    db_group = GroupRepo.fetch_by_id(db, group_id)
-    if db_group is None:
-        raise HTTPException(status_code=404, detail="group not found with the given ID")
-    await GroupRepo.delete(db, group_id)
-    return "Group deleted successfully!"
-#User
-@app.post('/register',  tags=["User"], response_model=schemas.User, status_code=201)
-async def create_user(user_request: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = UserRepo.fetch_by_name(db, password=user_request.name)
+    db_user = UserRepo.fetch_by_name(db, name=user_request.name)
+    print(db_user)
     if db_user:
-        raise HTTPException(status_code=400,detail='Account already exist')
+        raise HTTPException(status_code=400, detail="user already exists!")
 
     return await UserRepo.create(db=db, user=user_request)
 
-@app.get('/login/{user_id}', tags=["User"],response_model=schemas.User)
+
+@app.get('/users', tags=["User"], response_model=List[schemas.User])
+def get_all_users(name: Optional[str] = None, db: Session = Depends(get_db)):
+    """
+    Get all the User stored in database
+    """
+    if name:
+        users = []
+        db_user = UserRepo.fetch_by_name(db, name)
+        print(db_store)
+        users.append(db_user)
+        return users
+    else:
+        return UserRepo.fetch_all(db)
+
+
+#login & register
+@app.post('/register',  tags=["register"], response_model=schemas.User, status_code=201)
+async def create_register(user_request: schemas.UserRegister, db: Session = Depends(get_db)):
+    db_user = UserRepo.fetch_by_name(db, name =user_request.name)
+    if db_user is None:
+        raise HTTPException(status_code=400,detail='Account not exist')
+        return await UserRepo.create(db=db, user=user_request)
+    else :
+        raise HTTPException(status_code=201,detail='Account already exist')
+    
+
+@app.post('/login/{user_id}', tags=["login"],response_model=schemas.User)
 def login(user_id: int, db: Session = Depends(get_db)):
     db_user = UserRepo.fetch_by_id(db, user_id)
     if db_user is None:
         raise HTTPException(status_code=404, detail="user not found with the given ID")
     return db_user
 
-@app.get("/universities/", tags=["University"])
-def get_universities() -> dict:
-    """
-    Return the List of universities for some random countries in sync way
-    """
-    data: dict = {}
-    data.update(universities.get_all_universities_for_country("turkey"))
-    # data.update(universities.get_all_universities_for_country("india"))
-    # data.update(universities.get_all_universities_for_country("iran"))
-    return data
 
 
-@app.get("/universities/async", tags=["University"])
-async def get_universities_async() -> dict:
-    """
-    Return the List of universities for some random countries in async way
-    """
-    data: dict = {}
-    await asyncio.gather(
-          universities.get_all_universities_for_country_async("turkey", data)
-        # , universities.get_all_universities_for_country_async("australia", data)
-        )
-    return data
+
 
 
 if __name__ == "__main__":

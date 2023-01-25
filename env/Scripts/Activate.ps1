@@ -28,7 +28,7 @@ Activates the Python virtual environment that contains the Activate.ps1 script,
 and shows extra information about the activation as it executes.
 
 .Example
-Activate.ps1 -VenvDir C:\Groups\MyGroup\Common\.venv
+Activate.ps1 -VenvDir C:\Users\MyUser\Common\.venv
 Activates the Python virtual environment located in the specified location.
 
 .Example
@@ -39,10 +39,10 @@ parentheses) while the virtual environment is active.
 
 .Notes
 On Windows, it may be required to enable this Activate.ps1 script by setting the
-execution policy for the group. You can do this by issuing the following PowerShell
+execution policy for the user. You can do this by issuing the following PowerShell
 command:
 
-PS C:\> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentGroup
+PS C:\> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 For more information on Execution Policies: 
 https://go.microsoft.com/fwlink/?LinkID=135170

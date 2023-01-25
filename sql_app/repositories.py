@@ -7,7 +7,7 @@ from . import models, schemas
 class ItemRepo:
     
  async def create(db: Session, item: schemas.ItemCreate):
-        db_item = models.Item(name=item.name,price=item.price,description=item.description,store_id=item.store_id,group_id=item.group_id,user_id=item.user_id)
+        db_item = models.Item(name=item.name,price=item.price,description=item.description,store_id=item.store_id,user_id=item.user_id)
         db.add(db_item)
         db.commit()
         db.refresh(db_item)
@@ -62,49 +62,26 @@ class StoreRepo:
         db.merge(store_data)
         db.commit()
 
-#group
-class GroupRepo:
-    
-    async def create(db: Session, group: schemas.GroupCreate):
-            db_group = models.Group(name=group.name)
-            db.add(db_group)
-            db.commit()
-            db.refresh(db_group)
-            return db_group
-        
-    def fetch_by_id(db: Session,_id:int):
-        return db.query(models.Group).filter(models.Group.id == _id).first()
-    
-    def fetch_by_name(db: Session,name:str):
-        return db.query(models.Group).filter(models.Group.name == name).first()
-    
-    def fetch_all(db: Session, skip: int = 0, limit: int = 100):
-        return db.query(models.Group).offset(skip).limit(limit).all()
-    
-    async def delete(db: Session,_id:int):
-        db_group= db.query(models.Group).filter_by(id=_id).first()
-        db.delete(db_group)
-        db.commit()
-        
-    async def update(db: Session,group_data):
-        db.merge(group_data)
-        db.commit()
-
+#user
 class UserRepo:
     
     async def create(db: Session, user: schemas.UserCreate):
-            db_user = models.User(name=user.name, id=user.id, password=user.password ,email=user.email ,phone=user.phone)
+            db_user = models.User(name=user.name, email = user.email , password = user.password , phone= user.phone)
             db.add(db_user)
             db.commit()
             db.refresh(db_user)
             return db_user
         
-    def fetch_by_email(db: Session,_email:str):
-        return db.query(models.User).filter(models.User.email == email).first()
-    def fetch_by_password(db: Session,_password:int):
-        return db.query(models.User).filter(models.User.password == password).first()
     def fetch_by_id(db: Session,_id:int):
         return db.query(models.User).filter(models.User.id == _id).first()
+    
     def fetch_by_name(db: Session,name:str):
         return db.query(models.User).filter(models.User.name == name).first()
     
+    def fetch_all(db: Session, skip: int = 0, limit: int = 100):
+        return db.query(models.User).offset(skip).limit(limit).all()
+    
+        
+    async def update(db: Session,user_data):
+        db.merge(user_data)
+        db.commit()

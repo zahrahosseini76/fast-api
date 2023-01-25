@@ -37,7 +37,7 @@ It provides a full suite of well known enterprise-level persistence patterns, de
 
 Data validation and settings management using python type annotations.
 
-pydantic enforces type hints at runtime, and provides group-friendly errors when data is invalid.
+pydantic enforces type hints at runtime, and provides user-friendly errors when data is invalid.
 
 ## Setting up the VirtualEnv and install dependencies
 
